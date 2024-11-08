@@ -1,6 +1,16 @@
+
 ■ GCC
 gcc -c sum.c	# create sum.o object file throught comfile from sum.c
 gcc -o calc sum.o add.o	# create execute file throught two oject file(sum.o, add.o)
+
+■ Make
+make - object, library, binary crreate
+make distclean - delete configure file, backup file, patch file
+make clean - undo before comfile, delete creation file
+make mrproper - delete configure info
+make menuconfig - text menu
+make xconfig - X windows, Qt config tool
+make nconfig - text menu, color, F1~F9
 
 ■ Modules
 modprobe - Add and remove modules from the Linux Kernel
@@ -9,6 +19,12 @@ lsmod - Show the status of modules in the Linux Kernel
 istmod - Simple programe to insert a module into the Linux Kernel
 modinfo
 rmmod
+
+■ Disk Infomation
+blkid /dev/sda2
+dumpe2fs /dev/sda2
+blockdev --getbsz /dev/sda2
+blockdev --report /dev/sda2
 
 ■ Print
 lp -n 2 /etc/passwd
@@ -20,13 +36,30 @@ cron.*	/var/log/cron
 authpriv.*;authprov.!=info	/var/log/sshlog
 *.=crit	/var/log/critical
 
+■ Logrotate
+/etc/logrotate.conf
+/var/log/wtmp {
+weekly
+create 0600 root utmp
+rotagte 4
+}
+
 ■ Login
 lastlog	- reports the most recent login of all users or of a given users
 last, lastb - show a listing of last logged in users
+last -f /var/log/wtmp
+lastb -f /var/log/btmp
 
 ■ Copy
 rsync -avz root@1.1.1.1:/home backup
+find /home | cpio -ocv > home.cpio
+cpio -icv < home.cpio
 
+■ NIS
+nisdomainname test.co.kr
+vim /etc/sysconfig/network
+NISDOMAIN=test.co.kr
+	
 ■ sendmail
 A. Configure files
   1. /etc/mail/sendmail.cf
@@ -40,7 +73,12 @@ A. Configure files
      - From:spammer@aol.com		REJECT
      - TO:posein.org			RELAY
      - Connect:posein.org		RELAY
-     # makemap hash /etc/mail/access < /etc/mail/access
+     # makemap hash /etc/mail/access < /etc/mail/access■ NIS 짧막하게 중요한거
+가. NIS 도메인명 설정
+  1. nisdomainname test.co.kr
+  2. vim /etc/sysconfig/network
+	# cat /etc/sysconfig/network
+	# NISDOMAIN=test.co.kr
   4. /etc/mail/aliases
      - webmaster:	posein, yuloje, jalin, joon, posein@naver.com
      - admin::include:/etc/mail/admgroup
@@ -106,6 +144,7 @@ E. Apache Command
 	B) httpd -t	# syntax error check
 	C) httpd -l	# list module
 	D) httpd -S	# list virtual host information
+	E) httpd -k graceful
   2. apachectl
 	A) apachectl (start|stop|restart)	
 	B) apachectl configtest
@@ -173,6 +212,11 @@ B. zone syntax
     file "linux.rev";
     }
 C. zone file structure
+   IN NS ns.ihd.or.kr.
+   IN A 192.168.12.22
+   IN MX 10 ihd.or.kr
+   www IN A 192.168.12.22
+   www1 IN CNAME www
   1. 기본 구조	
 	$TTL	1D
 	@ IN SOA nameserver contact-email-address {

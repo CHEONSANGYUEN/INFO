@@ -1,4 +1,3 @@
-
 ■ GCC
 gcc -c sum.c	# create sum.o object file throught comfile from sum.c
 gcc -o calc sum.o add.o	# create execute file throught two oject file(sum.o, add.o)
@@ -151,12 +150,6 @@ C. command
    7. smbpasswd
    8. pdbedit
 
-
-
-
-
-
-
 ■ DNS
 A. /etc/named.conf 파일
   - listen-on port 53 { 127.0.0.1; };
@@ -206,7 +199,7 @@ C. zone file structure
 		# NS: DNS 지정 시 사용
 		# MX: 메일 서버를 지정할 때 사용, 0 or 양수 기입하여 우선순위 설정
 		# PTR: 리버스 존에서만 사용하는 레코드, IP 주소를 도메인으로 변환
-마. DNS 서버 설정 확인
+D. DNS 서버 설정 확인
   1. etc/resolv.conf 파일 변경 후 조회
 	ㄱ. cat /etc/resolv.conf 
 	   nameserver 10.0.2.15
@@ -219,6 +212,18 @@ C. zone file structure
   2. nslookup
 	server IP
 	도메인
-바. DNS 유틸리티
+E. DNS 유틸리티
   1. named-checkconf named.conf	# syntax error check
   2. named-checkzone domain zone_file path	# zonfile syntax error check
+
+■ Proxy (Squid)
+A. /etc/squid/squid.conf
+  - cache_dir
+  - http_port 3128
+  - acl local src 192.168.10.0/255.255.255.0
+    http_access allow local
+	http_access deny all
+  - acl Safe_Ports port 80
+    acl Safe_Ports port 21
+	http_access deny !Safe_Ports
+  - cache_eme 2048MB

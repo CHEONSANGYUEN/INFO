@@ -1,8 +1,15 @@
 
+■ GCC
+gcc -c sum.c	# create sum.o object file throught comfile from sum.c
+gcc -o calc sum.o add.o	# create execute file throught two oject file(sum.o, add.o)
+
 ■ Modules
 modprobe - Add and remove modules from the Linux Kernel
 depmod - Generate modules.dep and map files
 lsmod - Show the status of modules in the Linux Kernel
+istmod - Simple programe to insert a module into the Linux Kernel
+modinfo
+rmmod
 
 ■ Print
 lp -n 2 /etc/passwd
@@ -133,7 +140,7 @@ B. configure file: /etc/samba/smb.conf
    netbios name = MYSERVER
    interfaces = lo eth0 192.168.50.2/24 192.168.51.2/24
    hosts allow = 127. 192.168.12. 192.168.13 EXCEPT(제외) 192.168.51.3
-   security = user\
+   security = user
 C. command
    1. smbclient -L joon -U administrator%1234(p/w)
    2. smbclient \\\\joon\\source -U administrator
@@ -143,3 +150,75 @@ C. command
    6. mount.cifs. mount -t cifs
    7. smbpasswd
    8. pdbedit
+
+
+
+
+
+
+
+■ DNS
+A. /etc/named.conf 파일
+  - listen-on port 53 { 127.0.0.1; };
+  - directory "/var/named";
+  - forwarders { nameserver1; nameserver2;...};
+  - forward (only|first);
+  - allow-query { 192.168.0/24; };
+  - allow-transfer { 192.168.0/24; };
+  - acl "member" { 210.96.52.100; 203.247.40/24 211.58.96.100; };
+B. zone syntax
+  - zone "domainname" IN {
+    type (master | slave | hint);
+    file "zonfilename";
+    };
+  - zone "linux.or.kr" IN {
+    type master;
+    file "linux.zone";
+    };
+  - zone "2.0.10.in-addr.arpa" IN {
+    type master;
+    file "linux.rev";
+    }
+C. zone file structure
+  1. 기본 구조	
+	$TTL	1D
+	@ IN SOA nameserver contact-email-address {
+		serial_num		; serial
+		refresh_number		; refresh
+		retry_number		; retry
+		expire_number		; expire
+		minimum_number  )	; minimum
+	도메인	TTL  class  type		Rdata
+	   - $TTL
+		# 다른 서버에서 도메인 정보를 가져갔을 때, 해당 서버의 캐시에 해당 정보를 얼마나 가지고 있을지 결정, 86400 or 1D: 1일
+	   - SOA record
+		# namserver: 네임 서버의 호스트명과 도메이명 기재, 전체 도메인으로 기입할 시 마지막에 . 찍어야 함, ns.linux.or.kr.
+	   	# contact_email_address: 관리자 이메일 주소 기재, posein.linux.or.kr.
+	   - serial_num: 일련번호
+	   - refresh_number; 보조네임서버가 정보 업데이트를 위해 네임서버에 체크하는 주기
+	   - retry_number: 보조네임서버가 주네임서버에 접근 실패 시 재시도 주기
+	   - expire_number: 네임서버에 접근 실패, 재시도 주기
+	   - minumum_number: SOA 영역의 TTL, 가져간 정보의 최소 보관 시간 설정
+	   - 도메인: @는 현재 도메인, 공백은 위에서 설정한 도메인
+	   - type:
+		# A: IPv4 주소 기입
+		# AAAA: IPv6 주소 기입
+		# NS: DNS 지정 시 사용
+		# MX: 메일 서버를 지정할 때 사용, 0 or 양수 기입하여 우선순위 설정
+		# PTR: 리버스 존에서만 사용하는 레코드, IP 주소를 도메인으로 변환
+마. DNS 서버 설정 확인
+  1. etc/resolv.conf 파일 변경 후 조회
+	ㄱ. cat /etc/resolv.conf 
+	   nameserver 10.0.2.15
+	ㄴ. nslookup www.linux.or.kr
+	   Server:	10.0.2.15
+	   Address: 	10.0.2.15#53
+
+	   Name:    www.linux.or.kr
+	   Address:    10.0.2.15
+  2. nslookup
+	server IP
+	도메인
+바. DNS 유틸리티
+  1. named-checkconf named.conf	# syntax error check
+  2. named-checkzone domain zone_file path	# zonfile syntax error check

@@ -116,4 +116,30 @@ F. user authtification
       # AuthType Basic
       # AuthName "Admin Login"
       # AuthUserFile /etc/password
-      # Require valid-user	 
+      # Require valid-user
+
+■ Samba
+A. daemon : smbd, nmbd
+B. configure file: /etc/samba/smb.conf
+   [www]
+   comment = Web Directory
+   path = /usr/local/apache/htdocs
+   valid users = ihduser kaituser
+   writable = yes
+
+   [global]
+   workgroup = SAMBA
+   server string = Samba Server
+   netbios name = MYSERVER
+   interfaces = lo eth0 192.168.50.2/24 192.168.51.2/24
+   hosts allow = 127. 192.168.12. 192.168.13 EXCEPT(제외) 192.168.51.3
+   security = user\
+C. command
+   1. smbclient -L joon -U administrator%1234(p/w)
+   2. smbclient \\\\joon\\source -U administrator
+   3. smbstatus	#current connect information
+   4. testparm	# samba configure file check
+   5. nmblookup	# IP address query from NetBIOS
+   6. mount.cifs. mount -t cifs
+   7. smbpasswd
+   8. pdbedit

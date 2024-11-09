@@ -44,6 +44,12 @@ create 0600 root utmp
 rotagte 4
 }
 
+■ NFS
+exportfs - maintain table of exported NFS file system
+showmount - show mount information for an NFS server
+rpcinfo - report RPC information
+nfsstat - list NFS statistics
+
 ■ Login
 lastlog	- reports the most recent login of all users or of a given users
 last, lastb - show a listing of last logged in users
@@ -55,7 +61,27 @@ rsync -avz root@1.1.1.1:/home backup
 find /home | cpio -ocv > home.cpio
 cpio -icv < home.cpio
 
+■ Quota
+/etc/fstab 4th fild : usrquota, grpquota
+edqutoa -t
+edqutoa -p ihduser kaituser
+setquota
+quota
+repquota
+quotacheck /home
+edquota kaituser
+
 ■ NIS
+ypserv.service	#NIS server main daemon
+yppasswdd.service	#NIS user password management
+ypxfrd.service	#NIC server and client increase mapping speed
+ypwhich	#query NIS server
+ypwitch -m	#print map file
+ypcat hosts.byname
+ypcat passwd.byname
+yppasswd nisuser
+yptest
+ypchfn
 nisdomainname test.co.kr
 vim /etc/sysconfig/network
 NISDOMAIN=test.co.kr
@@ -305,3 +331,78 @@ host posein_pc {
     hardware ethernet 08:00:07:26:c0:a5; 
     fixed-address 192.168.1.22;
 }
+
+■ Super Daemon
+A. TCP Wrapper
+  - /etc/hosts.allow
+  - /etc/hosts.deny
+  - daemon_list : client_list [ : sheel_command]
+  - ALL : localhost, .posein.org
+    in.telnetd : 192.168.5.13
+    in.telnetd@192.168.1.254: 192.168.1.
+    sshd : .posein.com EXECPT cracker.posein.com
+    ALL EXCEPT vsftpd : .ihd.or.kr EXCEPT bad.ihd.or.kr
+B. xinetd
+  1. 개요: inetd 대체하며, TCP wrapper 같은거 필요 없이 자체적으로 접근제어 가능
+	     IP 주소당 접속 수 제한, 시간대별 서비스 제한, DoS 공격 대비 설정 추가 제공
+  2. 구성 요소
+	ㄱ. /etc/xinetd.conf
+	   - 전체 서비스 환경설정
+	ㄴ. /etc/xinetd.d
+	   - 해당 데몬에 의해 관리되는 서비스 파일 위치
+  3. /etc/xinetd.conf
+	defaults
+	{
+		log_type		= SYSLOG daemon info
+		log_on_failure	= HOST
+		log_on_success	= PID HOST DURATION EXIT
+		cps		= 50 10
+		instances		= 50
+		per_source	= 10
+		v6only		= no
+		groups		= yes
+		umask		= 002
+	}
+	includedir /etc/xinetd.d
+	   - log_type
+		# 로그 저장 형태 지정, SYSLOG, FILE 두 가지 설정 가능
+	   - cpus
+		# 초당 요청 받은 수에 대한 제한 설정
+		# cpu	= 50 10
+		   - 초당 요청 수가 50개 이상일 경우 10초동안 연결 중단
+	   - instances
+		# xinetd가 생성하는 관련 데몬 최대 개수 지정
+	   - per_source
+		# 같은 IP 주소로 접속할 수 있는 서비스 수 제한
+	   - only_from
+		# 접속 허가할 호스트 IP 설정
+	   - enable
+		# 사용 가능한 서비스 지정
+	   - disable
+		# 반대
+  4. /etc/xinetd.d/telnet
+	ㄱ. vim /etc/xinetd/telnet
+	service telnet
+	{
+		disable		= no
+		flags		= REUSE
+		socket_type	= stream
+		wait		= no
+		user		= root
+		server		= /usr/sbin/in.telnetd
+		log_on_failure	+= USERID
+	}
+	   - disable	= no
+		# 서비스 실행 유무 지정, no면 사용 yes면 사용 안함
+	   - flags	= REUSE
+		# 계속적으로 재사용
+	   - socket_type	= stream
+		# 네트워크 소켓 타입 지정
+	   - wait		= no
+		# 서비스가 단일 스레드인지 다중 스레드를 결정하는 항목, yes 면 단일 스레드
+	   - user		= root
+		# 서버 프로세스 UID 지정
+	   - server	= /usr/sbin/in.telnetd
+		# 해당 서비스 실행 데몬 파일 경로 지정
+	   - log_on_failure += USERID
+		# 로그 관련 설정
